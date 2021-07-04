@@ -6,47 +6,34 @@ class Task {
     {
         $db = new Database();
         $tasks = $db->makeQuery('SELECT * FROM tasks ORDER BY priority ASC');
-
-        return $this->jsonResponse($tasks);
+        return $tasks;
     }
 
-    public function add($data)
+    public function add()
     {
-        $status = 'success';
         $db = new Database();
-
+        $data = $_POST;
         $data['deadline'] = date('Y-m-d H:i:s', strtotime(str_ireplace('/', '-', $data['deadline'])));
-        $data['deadline'] = str_replace('T', ' ', $data['deadline']) . ':00';
+        $db->save('tasks', $data);
 
-        if (!$db->save('tasks', $data)) {
-            $status = 'error';
-        }
-
-        return $this->jsonResponse(array(
-            'status' => $status,
-            'task' => $data,
-        ));
+        return header('location: index.php');
     }
 
     public function edit()
     {
+        $db = new Database();
+        $data['deadline'] = date('Y-m-d H:i:s', strtotime(str_ireplace('/', '-', $_POST['deadline'])));
 
+        $db->update('tasks', $_POST);
+        return header('location: index.php');
     }
 
-    public function delete()
+    public function delete($id)
     {
-        $status = 'success';
-
-        $id = $_GET['task_id'];
         $db = new Database();
+        $db->delete('tasks', $id);
 
-        if (!$db->delete('tasks', $id)) {
-            $status = 'error';
-        }
-
-        return $this->jsonResponse(array(
-            'status' => $status,
-        ));
+        return header('location: index.php');
     }
 
     public function jsonResponse($data)
@@ -55,8 +42,7 @@ class Task {
         print_r(json_encode($data, true));
     }
 
-    public function getOneTask() {
-        $id = $_GET['task_id'];
+    public function getOneTask($id) {
         $db = new Database();
 
         $task = $db->makeQuery("SELECT * FROM tasks where tasks.id = '" . $id ."'");
@@ -67,23 +53,21 @@ class Task {
     }
 }
 
-$action = $_GET['action'];
 $task = new Task();
 
-switch($action) {
-    case 1:
-        $task->add($_POST);
-        break;
-    case 2:
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!empty($_POST['id']))
         $task->edit();
-        break;
-    case 3:
-        $task->delete();
-        break;
-    case 4:
-        $task->getOneTask();
-        break;
-    default:
-    $task->list();
-        break;
+    else
+        $task->add();
+}
+
+if (isset($_GET['task_id'])) {
+    $task = new Task();
+    $task->delete($_GET['task_id']);
+}
+
+if (isset($_GET['id_task'])) {
+    $task = new Task();
+    $task->getOneTask($_GET['id_task']);
 }

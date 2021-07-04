@@ -1,48 +1,3 @@
-$(function() {
-    const btnAdd = $('#btn-add');
-    const modal = $('#modal-add');
-    const btnClose = $('.close-modal');
-    const btnSubmit = $('#submit-form');
-    const taskFormInputs = $('form#task-form :input');
-    const cardDiv = $('#card-div');
-
-    $(function() {
-        $('#task-deadline').daterangepicker({
-            singleDatePicker: true,
-            showDropdowns: true,
-            minYear: 1901,
-            maxYear: parseInt(moment().format('YYYY'),10),
-            timePicker: true,
-            timePicker24Hour: true,
-            startDate: moment().startOf('hour'),
-            endDate: moment().startOf('hour').add(32, 'hour'),
-            autoUpdateInput: false,
-            locale: {
-                format: 'DD/MM/YYYY',
-            }
-        })
-        .on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('DD/MM/YYYY HH:mm')).prev().css({
-                opacity: 0,
-                display: 'none',
-            });
-        });
-    });
-
-    listTasks();
-
-    btnAdd.on('click', () => {
-        modal.show();
-        $('input, textarea').val('');
-    });
-
-    btnClose.on('click', () => {
-        modal.hide();
-    });
-
-    btnSubmit.on('click', () => {
-        validateForm();
-    });
 
     $(document).on('click', '.edit-task', function() {
         modal.show();
@@ -63,26 +18,6 @@ $(function() {
         });
     });
 
-    function validateForm() {
-        let submitForm = true;
-        let formData = {};
-
-        taskFormInputs.each(function() {
-            if ($(this).val() === '') {
-                submitForm = false;
-                $(`#validate-${$(this).attr('id')}`).html('<span class="text-danger">Preenchimento obrigatório</span>');
-            } else {
-                $(`#validate-${$(this).attr('id')}`).html('');
-                let inputName = $(this).attr('name');
-                formData[inputName] = $(this).val();
-            }
-        });
-
-        if (submitForm) {
-            submitFormTask(formData);
-        }
-    }
-
     function listTasks() {
         $.ajax({
             url: 'Task.php?action',
@@ -96,8 +31,16 @@ $(function() {
     }
 
     function submitFormTask(data) {
+        let url;
+
+        if ($("#task-id").val() != '') {
+            url = 'Task.php?action=2'
+        } else {
+            url = 'Task.php?action=1';
+        }
+
         $.ajax({
-            url: 'Task.php?action=1',
+            url: url,
             type: 'POST',
             data: data,
             success: data => {
@@ -168,17 +111,6 @@ $(function() {
     }
 
     function getOneTask(id) {
-        $.ajax({
-            url: `Task.php?action=4&task_id=${id}`,
-            type: 'GET',
-            success: data => {
-                $.each(data.task, function(key, value) {
-
-                    if ($(`#task-${key}`).length > 0) {
-                        $(`#task-${key}`).val(value)
-                    }
-                });
-            }
-        });
+   
     }
 });

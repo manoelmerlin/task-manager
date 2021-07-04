@@ -86,4 +86,26 @@ class Database {
             return $exception->getMessage();
         }
     }
+
+    public function update($table, $data)
+    {
+        $strToSave = '';
+		$id = $data['id'];
+		unset($data['id']);
+        $arrayKeys = array_keys($data);
+		$endArray = end($arrayKeys);
+
+        foreach ($data as $key => $value) {
+            $strToSave .= "$key = :$key" . ($key === $endArray ? '' : ', ');
+        }
+
+        $query = trim("UPDATE $table SET $strToSave WHERE id = " . $id . ";");
+        $stmt = $this->conexao->prepare($query);
+
+        foreach ($data as $key => $value) {
+            $stmt->bindValue(":$key", $value, $this->varType[gettype($value)]);
+        }
+
+        return $stmt->execute();
+    }
 }
