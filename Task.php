@@ -11,11 +11,10 @@ class Task {
 
     public function list()
     {
-        if (isset($_GET['status']) && $_GET['status'] == 2) {
+        if (isset($_GET['status']) && $_GET['status'] == 2)
             $status = 2;
-        } else {
+        else
             $status = 1;
-        }
 
         $tasks = $this->db->makeQuery("SELECT * FROM tasks WHERE tasks.status = '" . $status ."' ORDER BY priority ASC");
 
@@ -52,7 +51,8 @@ class Task {
         return print_r(json_encode($data, true));
     }
 
-    public function getOneTask($id) {
+    public function getOneTask($id)
+    {
         $task = $this->db->makeQuery("SELECT * FROM tasks where tasks.id = '" . $id ."'");
 
         return $this->jsonResponse(array(
