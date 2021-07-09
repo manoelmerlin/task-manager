@@ -5,14 +5,18 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Teste</title>
+	<title>Task Manager</title>
 
+	<link rel="shortcut icon" href="imgs/favicon-16x16.png" />
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 	<link href="css/style.css" rel="stylesheet">
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Encode+Sans+SC:wght@100&display=swap" rel="stylesheet">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
@@ -38,37 +42,54 @@
 		</div>
 	</nav>
 
-	<div class="row m-0 d-flex justify-content-center mt-3">
-		<div class="col-md-6">
+	<div class="d-flex justify-content-center">
+		<div class="col-4 mt-5 p-2" style="background-color: #dee2e6;">
+			<div class="row m-0">
+				<div class="col-6 <?= !isset($_GET['status']) || $_GET['status'] == 1 ? 'border-bottom border-primary' : 'tab-inactive' ?> d-flex justify-content-center">
+					<h4><a href="index.php">Em andamento</a>
+					</h4>
+				</div>
 
+				<div class="col-6 <?= isset($_GET['status']) && $_GET['status'] == 2 ? 'border-bottom border-primary' : 'tab-inactive' ?> d-flex justify-content-center">
+					<h4><a href="index.php?status=2">Prontas</a>
+					</h4>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row m-0 d-flex justify-content-center mt-5">
+		<div class="col-md-6">
 			<div class="card-list">
 				<div class="card-list-head">
 					<h6 class="p-3">Tarefas</h6>
 					<div class="p-3">
-						<button id="btn-add" class="btn-success">
-							Adicionar
-						</button>
+						<?php if (!isset($_GET['status']) || $_GET['status'] != 2): ?>
+							<button id="btn-add" class="btn-success">
+								Adicionar
+							</button>
+						<?php endif; ?>
 					</div>
 				</div>
 
 				<?php
-					$task = new Task();
-					$tasks = $task->list();
+				$task = new Task();
+				$tasks = $task->list();
 				?>
 
 				<?php foreach ($tasks as $task) : ?>
 					<?php
-						switch($task['priority']) {
-							case 1:
-								$priority = 'bg-danger';
-								break;
-							case 2:
-								$priority = 'bg-warning';
-								break;
-							case 3:
-								$priority = 'bg-primary';
-								break;
-						}
+					switch ($task['priority']) {
+						case 1:
+							$priority = 'bg-danger';
+							break;
+						case 2:
+							$priority = 'bg-warning';
+							break;
+						case 3:
+							$priority = 'bg-primary';
+							break;
+					}
 					?>
 					<div class="card-list-body">
 						<div class="card card-task">
@@ -79,7 +100,7 @@
 								<div class="card-title">
 									<a href="#">
 										<h6 data-filter-by="text" class="H6-filter-by-text"><?= $task['name'] ?> -
-											<small class="text-dark font-11">Prazo : <?= date('Y-m-d', strtotime($task['deadline'])) ?></small>
+											<small class="text-dark font-11">Prazo : <?= date('d-m-Y', strtotime($task['deadline'])) ?></small>
 										</h6>
 									</a>
 								</div>
@@ -89,16 +110,18 @@
 											<?= $task['description'] ?>
 										</p>
 									</div>
-									<div class="dropdown card-options p-0">
-										<button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-										</button>
-										<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-											<li><a class="dropdown-item text-success" href="#">Finalizar</a></li>
-											<li><a data-id="<?= $task['id'] ?>" class="dropdown-item text-primary edit-btn" href="#">Editar</a></li>
-											<li><a class="dropdown-item text-danger" href="Task.php?task_id=<?= $task['id'] ?>">Deletar</a></li>
-										</ul>
-									</div>
-									<small class="text-small font-11">Criado em : <?= date('Y-m-d', strtotime($task['created'])) ?></small>
+									<?php if (!isset($_GET['status']) || $_GET['status'] != 2): ?>
+										<div class="dropdown card-options p-0">
+											<button class="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+											</button>
+											<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+												<li><a class="dropdown-item text-success" href="Task.php?taskid=<?= $task['id'] ?>&finish">Finalizar</a></li>
+												<li><a data-id="<?= $task['id'] ?>" class="dropdown-item text-primary edit-btn" href="#">Editar</a></li>
+												<li><a class="dropdown-item text-danger" href="Task.php?task_id=<?= $task['id'] ?>">Deletar</a></li>
+											</ul>
+										</div>
+									<?php endif; ?>
+									<small class="text-small font-11">Criado em : <?= date('d-m-Y', strtotime($task['created'])) ?></small>
 								</div>
 							</div>
 						</div>

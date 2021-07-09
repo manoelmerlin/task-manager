@@ -2,36 +2,46 @@
 require_once "Database.php";
 
 class Task {
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = new Database();
+    }
+
     public function list()
     {
-        $db = new Database();
-        $tasks = $db->makeQuery('SELECT * FROM tasks ORDER BY priority ASC');
+        if (isset($_GET['status']) && $_GET['status'] == 2) {
+            $status = 2;
+        } else {
+            $status = 1;
+        }
+
+        $tasks = $this->db->makeQuery("SELECT * FROM tasks WHERE tasks.status = '" . $status ."' ORDER BY priority ASC");
+
         return $tasks;
     }
 
     public function add()
     {
-        $db = new Database();
         $data = $_POST;
         $data['deadline'] = date('Y-m-d H:i:s', strtotime(str_ireplace('/', '-', $data['deadline'])));
-        $db->save('tasks', $data);
+        $this->db->save('tasks', $data);
 
         return header('location: index.php');
     }
 
     public function edit()
     {
-        $db = new Database();
-        $data['deadline'] = date('Y-m-d H:i:s', strtotime(str_ireplace('/', '-', $_POST['deadline'])));
+        $_POST['deadline'] = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $_POST['deadline'])));
 
-        $db->update('tasks', $_POST);
+        $this->db->update('tasks', $_POST);
         return header('location: index.php');
     }
 
     public function delete($id)
     {
-        $db = new Database();
-        $db->delete('tasks', $id);
+        $this->db->delete('tasks', $id);
 
         return header('location: index.php');
     }
@@ -39,17 +49,22 @@ class Task {
     public function jsonResponse($data)
     {
         header("Content-Type: application/json; charset=UTF-8");
-        print_r(json_encode($data, true));
+        return print_r(json_encode($data, true));
     }
 
     public function getOneTask($id) {
-        $db = new Database();
-
-        $task = $db->makeQuery("SELECT * FROM tasks where tasks.id = '" . $id ."'");
+        $task = $this->db->makeQuery("SELECT * FROM tasks where tasks.id = '" . $id ."'");
 
         return $this->jsonResponse(array(
             'task' => $task[0],
         ));
+    }
+
+    public function finishTask($id)
+    {
+
+        $this->db->makeQuery("UPDATE tasks SET tasks.status = 2 WHERE tasks.id = '" . $id ."'");
+        return header('location: index.php');
     }
 }
 
@@ -62,12 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $task->add();
 }
 
-if (isset($_GET['task_id'])) {
-    $task = new Task();
+if (isset($_GET['task_id']))
     $task->delete($_GET['task_id']);
-}
 
-if (isset($_GET['id_task'])) {
-    $task = new Task();
+if (isset($_GET['id_task']))
     $task->getOneTask($_GET['id_task']);
-}
+
+if (isset($_GET['taskid']) && isset($_GET['finish']))
+    $task->finishTask($_GET['taskid']);

@@ -1,22 +1,6 @@
-/* .modal {
-    top: 60px !important;
-}
-
-.daterangepicker {
-    color: black !important;
-}
-
-.delete-task {
-    cursor: pointer;
-}
-
-.card-task {
-    width: 600px;
-    height: 220px;
-} */
-
 body {
     background-image: url("../imgs/background.jpg");
+    font-family: 'Uchen', serif;
 }
 
 .card-list {
@@ -114,4 +98,9 @@ a {
 
 .dropdown-menu li > a:focus, .dropdown-submenu:hover > a {
     background-color: #fff;
+}
+
+.tab-inactive h4 a {
+    color: #292b2c !important;
+    text-decoration: none !important;
 }
